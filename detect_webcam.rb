@@ -6,6 +6,7 @@ require 'fosl/parser'
 require_relative 'blinkstick'
 
 VIDEO_FILES = ["/dev/video", "AppleCamera"]
+COLOR_ON = Color::RGB.new(255, 0, 0)
 
 parser = FOSL::Parser.new
 output = parser.lsof("-c zoom")
@@ -19,7 +20,12 @@ begin
   if matches.any?
     puts "Camera on. Turning on light!"
     BlinkStick.find_all.each { | b |
-      b.color = Color::RGB.new(255, 0, 0)
+      b.color = COLOR_ON
+    }
+  else
+    puts "No camera use detected"
+    BlinkStick.find_all.each { | b |
+      b.off
     }
   end
 rescue =>e 
