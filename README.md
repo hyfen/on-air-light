@@ -4,7 +4,24 @@ One of the things it can do is turn on a [red light](https://www.blinkstick.com/
 
 ![light](/docs/light.jpg)
 
+## Usage
+
+### Single foreground process:
+
+```bash
+bundle exec ruby detect_webcam.rb
+```
+
+### As a daemon
+
+```bash
+bundle exec ruby daemon.rb start
+bundle exec ruby daemon.rb stop
+```
+
 ## Configuration
+
+*Not implemented yet!*
 
 We need to specify the process names we're watching for, the filenames of the webcam devices on our system, and the action we want to take when use is detected.
 
