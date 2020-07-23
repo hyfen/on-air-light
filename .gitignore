@@ -1,3 +1,4 @@
 config.yml
 Gemfile.lock
 .DS_Store
+*.pid
