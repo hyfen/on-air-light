@@ -2,7 +2,7 @@ Detects whether a camera device is in use by a specified process.
 
 One of the things it can do is turn on a [red light](https://www.blinkstick.com/) when webcam use is detected: 
 
-![light](/docs/light.jpg)
+![light](/docs/demo.gif)
 
 ## Usage
 
