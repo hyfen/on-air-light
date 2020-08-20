@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'rubygems'
 require 'bundler/setup'
 require 'pry'
@@ -5,43 +7,51 @@ require 'fosl/parser'
 
 require_relative 'blinkstick'
 
-VIDEO_DEVICE_FILENAMES = ["/dev/video", "AppleCamera"]
+VIDEO_DEVICE_FILENAMES = %w[/dev/video /dev/video0 AppleCamera].freeze
+PROCESS_NAMES = %w[zoom firefox chrome].freeze
 COLOR_ON = Color::RGB.new(50, 0, 0)
 COLOR_OFF = Color::RGB.new(0, 50, 0)
 
 module OnAir
   class Detector
+    LSOF_ERROR_MESSAGE_WHEN_PROCESS_IS_NOT_FOUND = 'lsof exited with status 1'
+
     def initialize
       @parser = FOSL::Parser.new
     end
-    
+
     def detect
-      begin
-        # FIXME: handle more than Zoom
-        lsof_output = @parser.lsof("-c zoom")
-      rescue RuntimeError => e
-        handle_undetected
-        return
+      found_in_process = PROCESS_NAMES.detect do |process_name|
+        detect_for_process process_name
       end
 
-      # Get all the files that zoom has open and check to see if any of them
-      # are a video device file
-      open_files = lsof_output.values.first.files.map{|file| file[:name]}
-      matches = VIDEO_DEVICE_FILENAMES.map do |video_filename|
-        open_files.filter{|open_file| open_file.match(video_filename)}.any?
-      end
-
-      if matches.any?
-        handle_detected
+      if found_in_process
+        handle_detected(found_in_process)
       else
         handle_undetected
       end
     end
-    
+
     private
-    
-    def handle_detected
-      puts "Camera on. Turning on light!"
+
+    def detect_for_process(process_name)
+      open_files = files_opened_by_process(process_name)
+      open_files.any? { |filename| VIDEO_DEVICE_FILENAMES.include? filename }
+    end
+
+    def files_opened_by_process(process_name)
+      pid_data = @parser.lsof("-c #{process_name}").values
+      file_hashes = pid_data.map(&:files).flatten
+      found_files = file_hashes.map { |file_hash| file_hash[:name] }
+    rescue RuntimeError => e
+      pp e unless e.message == LSOF_ERROR_MESSAGE_WHEN_PROCESS_IS_NOT_FOUND
+      found_files = []
+    ensure
+      return found_files
+    end
+
+    def handle_detected(process_name)
+      puts "Camera being used by #{process_name}. Turning on light!"
       BlinkStick.find_all.each do | b |
         b.color = COLOR_ON
       end
