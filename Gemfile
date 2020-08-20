@@ -11,3 +11,7 @@ gem 'daemons'
 gem 'fosl'
 gem 'libusb'
 gem 'pry'
+
+group :development do
+  gem 'byebug'
+end
