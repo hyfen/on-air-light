@@ -14,7 +14,7 @@ module OnAir
     def initialize
       @parser = FOSL::Parser.new
     end
-    
+
     def detect
       begin
         # FIXME: handle more than Zoom
@@ -37,9 +37,9 @@ module OnAir
         handle_undetected
       end
     end
-    
+
     private
-    
+
     def handle_detected
       puts "Camera on. Turning on light!"
       BlinkStick.find_all.each do | b |
